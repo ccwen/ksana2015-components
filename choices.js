@@ -12,15 +12,15 @@ var Choices=React.createClass({
 		var disabled=item.disabled ? " disabled":"";
 		var disabled_label=item.disabledLabel ? " disabled":"";
 		var checked=(this.selected==idx) || this.props.checked;
-		var theinput=React.createElement("input", {type: this.props.type||"radio", 
+		var theinput=React.createElement("input", {type: this.props.type||"radio", key:"i"+idx,
 				defaultChecked:checked, className:disabled.trim(),name: "tagsettab", value: item.name}); 
 
 		var thelabel=React.createElement("span", 
-			{className:"tagsetlabel "+disabled_label.trim()}, item.label);
+			{key:"l"+idx,className:"tagsetlabel "+disabled_label.trim()}, item.label);
 
-		var labelfor=(this.props.labelfor)?React.createElement("label", null, theinput,thelabel):[theinput,,thelabel];
-		return React.createElement("span", {"data-n": idx, 
-			className:(this.props.type||"radio")+"inline"+disabled+disabled_label}, labelfor);
+		var labelfor=(this.props.labelfor)?React.createElement("label", null, theinput,thelabel):[theinput,thelabel];
+		return React.createElement("span", {"data-n": idx, key:"t"+idx,
+			className:(this.props.type||"radio")+"inline"+disabled+disabled_label},"　", labelfor);
 	},
 	select:function(e) {
 		var target=e.target;
