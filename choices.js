@@ -4,13 +4,18 @@ var Choices=React.createClass({
 		data:React.PropTypes.array.isRequired
 		,selected:React.PropTypes.number
 		,onSelect:React.PropTypes.func
+		,onCheck:React.PropTypes.func
 		,type:React.PropTypes.string
 		,checked:React.PropTypes.bool
+		,prefix:React.PropTypes.string
 		,labelfor:React.PropTypes.bool
 		,vposInItem:React.PropTypes.func //return vpos in each item(for rendering markup style)
 	}
 	,selected:0 //might receive from parent in the future
 	,vposInItem:[]
+	,getDefaultProps:function(){
+		return {prefix:""};
+	}
 	,renderDropdownItem:function(item,idx) {
 		var disabled=item.disabled ? " disabled":"";
 		return (
@@ -25,8 +30,9 @@ var Choices=React.createClass({
 		for (var j=0;j<samples.length;j++) {
 			var s=samples[j];
 			for (var i=0;i<s.length;i++) {
+				var key="k"+j+"_"+i;
 				var code=s.charCodeAt(i);
-				out.push(E("span",{key:"k"+j+"_"+i,"data-vpos":this.vpos},str[i]));
+				out.push(E("span",{key:key,"data-vpos":this.vpos},str[i]));
 				//if (code>=0x3400&&code<=0x9fff)	
 				this.vpos++;
 			}
@@ -43,31 +49,49 @@ var Choices=React.createClass({
 	,componentDidUpdate:function() {
 		if (this.props.vposInItem) this.props.vposInItem(this.vposInItem);
 	}
-	,renderItem:function(item,idx) {
+	,renderButton:function(item,idx) {
+		var label=item.label;
 		var disabled=item.disabled ? " disabled":"";
-		var disabled_label=item.disabledLabel ? " disabled":"";
-		var checked=(this.selected==idx) || this.props.checked;
-
-
-		var theinput=null;
-
-		if (this.props.type=="button") {
-			var label=item.label;
-			if (this.props.hotkey && idx<10) {
-				var hotkey=(idx+1).toString();
-				if (hotkey.length>1) hotkey=hotkey.substr(1);
-				label=hotkey+label;
-			}
-			theinput=React.createElement("button",{className:"btn btn-default markupbutton"+disabled,key:"b"+idx},label);
-		} else {
-			theinput=React.createElement("input", {type: this.props.type||"radio", key:"i"+idx,
-				defaultChecked:checked, className:disabled.trim(),name: "tagsettab", value: item.name}); 
+		if (this.props.hotkey && idx<10) {
+			var hotkey=(idx+1).toString();
+			if (hotkey.length>1) hotkey=hotkey.substr(1);
+			label=hotkey+label;
 		}
+
+		var thelinebreak=null;
+		if (this.props.linebreak) thelinebreak=E("br");		
+		var theinput=React.createElement("button",{className:"btn btn-default markupbutton"+disabled,key:"b"+idx},label);		
+		var description="",descriptionspans=null;
+		if (item.desc) description += " "+item.desc;
+		if (this.props.autovpos) descriptionspans=this.autovpos(description,item);
+		else descriptionspans=E("span",{className:"markupdesc"},description);
+
+		return E("span", {"data-n": idx,
+			key:"t"+idx,className:(this.props.type||"radio")+"inline"+disabled}
+			," ", theinput,descriptionspans,thelinebreak);
+
+	}
+	,onchange:function(e) {
+		var target=e.target;
+		while (target) {
+			if (target.dataset&& target.dataset.n) break;
+			else  target=target.parentNode;
+		}
+		if (!target) return;
+
+		var n=parseInt(target.dataset.n);
+		if (this.props.onCheck) this.props.onCheck(n,e.target.checked);
+	}
+	,renderCheckbox_radio:function(item,idx) {
+		var checked=(this.selected==idx);
+		if (this.props.type=="checkbox") checked=item.checked;
+		var theinput=null;
+		var key=this.props.prefix+"_i"+idx;
+		theinput=React.createElement("input", {type: this.props.type||"radio", key:key, id:key,
+				onChange: this.onchange, checked:checked,name: "tagsettab"}); 
 
 		var thelabel=null;
-		if (this.props.type!="button") {
-			thelabel=E("span", {key:"l"+idx,className:"tagsetlabel "+disabled_label.trim()}, item.label);
-		}
+		var thelabel=E("span", {key:"l"+idx,className:"tagsetlabel "}, item.label);
 
 		var thelinebreak=null;
 		if (this.props.linebreak) thelinebreak=E("br");
@@ -77,9 +101,9 @@ var Choices=React.createClass({
 		if (this.props.autovpos) descriptionspans=this.autovpos(description,item);
 		else descriptionspans=E("span",{className:"markupdesc"},description);
 
-		var labelfor=(this.props.labelfor)?E("label", null, theinput,thelabel):[theinput,thelabel];
+		var labelfor=(this.props.labelfor)?E("label", {"htmlFor":key}, theinput,thelabel):[theinput,thelabel];
 		return E("span", {"data-n": idx,
-			key:"t"+idx,className:(this.props.type||"radio")+"inline"+disabled+disabled_label}
+			key:"t"+idx,className:" inline"}
 			," ", labelfor,descriptionspans,thelinebreak);
 	}
 	,select:function(e) {
@@ -100,7 +124,9 @@ var Choices=React.createClass({
 		}
 	}
 	,renderItems:function(){
-		return (this.props.data ||[]).map(this.renderItem);
+		var itemrenderer=this.renderCheckbox_radio;
+		if (this.props.type=="button") itemrenderer=this.renderButton;
+		return (this.props.data ||[]).map(itemrenderer);
 	}
 	,selectedLabel:function() {
 		if (!this.props.data.length) return "";
