@@ -69,9 +69,10 @@ var VariableInfiniteList = React.createClass({
     }
     ,handleInfiniteLoad: function() {
         var that = this;
-        this.setState({ isInfiniteLoading: true});
+        if (!this.props.onLoad) return;
 
-        if (this.props.onLoad) this.props.onLoad(this.state.elementHeights.length,function(newdata){
+        this.setState({ isInfiniteLoading: true});
+        this.props.onLoad(this.state.elementHeights.length,function(newdata){
   			that.calculateHeight(newdata);
         });
     },
