@@ -1,3 +1,4 @@
+var React=require("react");
 var E=React.createElement;
 var Choices=React.createClass({
 	propTypes:{

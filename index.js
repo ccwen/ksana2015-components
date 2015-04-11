@@ -1,1 +1,1 @@
-module.exports={choices:require("./choices"),pageScrollMixin:require("./pagescroll")};
+module.exports={choices:require("./choices"),pageScrollMixin:require("./pagescroll"),infinite:require("./infinite")};
