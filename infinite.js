@@ -4,10 +4,7 @@ var E=React.createElement;
 var itemClassName="infinite-list-item";
 var ListItem = React.createClass({
     getDefaultProps: function() {
-        return {
-            height: 50,
-            lineHeight: "50px"
-        }
+        return { height: 50,  lineHeight: "50px" }
     },
     render: function() {
         return E("div",{className:itemClassName, style:{height: this.props.height,lineHeight: this.props.lineHeight}},
@@ -16,7 +13,8 @@ var ListItem = React.createClass({
 });
 
 var VariableInfiniteList = React.createClass({
-    getInitialState: function() {
+    displayName:"VariableInfiniteList"
+    ,getInitialState: function() {
         return {
         	elements:[],
         	elementData:[],
@@ -29,7 +27,6 @@ var VariableInfiniteList = React.createClass({
     		setTimeout(function(){
     			this.handleInfiniteLoad();	
     		}.bind(this),1);
-    		
     	}
     }
     ,componentDidMount:function() {
@@ -41,7 +38,6 @@ var VariableInfiniteList = React.createClass({
         return heights;
     },
     calculateHeight:function(newdata) {
-      	//var root=
       	var div=document.createElement("div");
       	div.className=itemClassName;
       	div.style.visibility="hidden";
@@ -73,7 +69,7 @@ var VariableInfiniteList = React.createClass({
 
         this.setState({ isInfiniteLoading: true});
         this.props.onLoad(this.state.elementHeights.length,function(newdata){
-  			that.calculateHeight(newdata);
+          that.calculateHeight(newdata);
         });
     },
     elementInfiniteLoad: function() {
@@ -83,14 +79,16 @@ var VariableInfiniteList = React.createClass({
     	var itemClass=this.props.itemClass;
         var containerHeight=this.props.height;
         infiniteLoadBeginBottomOffset=containerHeight-50;
-        return E(Infinite,{elementHeight:this.state.elementHeights,
-                         containerHeight:containerHeight,
-                         infiniteLoadBeginBottomOffset:infiniteLoadBeginBottomOffset,
-                         onInfiniteLoad:this.handleInfiniteLoad,
-                         loadingSpinnerDelegate:this.elementInfiniteLoad(),
-                         isInfiniteLoading:this.state.isInfiniteLoading,
-                         timeScrollStateLastsForAfterUserScrolls:1000}
-                         ,this.state.elements);
+        return E(Infinite
+               ,{elementHeight:this.state.elementHeights,
+                 containerHeight:containerHeight,
+                 infiniteLoadBeginBottomOffset:infiniteLoadBeginBottomOffset,
+                 onInfiniteLoad:this.handleInfiniteLoad,
+                 loadingSpinnerDelegate:this.elementInfiniteLoad(),
+                 isInfiniteLoading:this.state.isInfiniteLoading,
+                 timeScrollStateLastsForAfterUserScrolls:1000}
+               ,this.state.elements
+        );
     }
 });
 
